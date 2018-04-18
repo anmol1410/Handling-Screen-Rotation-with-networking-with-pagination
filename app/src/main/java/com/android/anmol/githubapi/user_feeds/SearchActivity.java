@@ -198,8 +198,8 @@ public class SearchActivity extends AppCompatActivity {
             mParam = param;
             MyLog.i(TAG, "Query param : " + param);
 
-            mPbLoading.setVisibility(View.VISIBLE);
-            mTvMsg.setVisibility(View.GONE);
+//            mPbLoading.setVisibility(View.VISIBLE);
+//            mTvMsg.setVisibility(View.GONE);
 
             mHeadlessFragment.sendRequest(param, mPageCount = 0);
         }

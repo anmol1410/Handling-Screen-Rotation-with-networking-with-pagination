@@ -33,7 +33,9 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
             return;
         }
 
-//        mView.onPreLoad();
+        if (page == 0) {
+            mView.onPreLoad();
+        }
         cancelRequest();
 
         mUsersRepository.getUsers(new UserDataSource.FetchUsersCallback() {
