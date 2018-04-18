@@ -1,8 +1,8 @@
 package com.android.anmol.githubapi.user_feeds.presenter;
 
-import com.android.anmol.githubapi.data.source.UsersRepository;
 import com.android.anmol.githubapi.data.source.ResUserData;
 import com.android.anmol.githubapi.data.source.UserDataSource;
+import com.android.anmol.githubapi.data.source.UsersRepository;
 import com.android.anmol.githubapi.user_feeds.UserModel;
 import com.android.anmol.githubapi.utility.Utils;
 import com.android.anmol.githubapi.utility.converter.ResToUiUserList;
@@ -33,6 +33,8 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
             return;
         }
 
+        cancelRequest();
+
         mUsersRepository.getUsers(new UserDataSource.FetchUsersCallback() {
             @Override
             public void onUsersFetched(ResUserData users) {
@@ -49,6 +51,6 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
 
     @Override
     public void cancelRequest() {
-
+        mUsersRepository.cancelRequest();
     }
 }

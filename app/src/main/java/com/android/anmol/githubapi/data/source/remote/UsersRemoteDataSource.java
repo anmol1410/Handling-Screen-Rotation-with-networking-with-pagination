@@ -30,11 +30,6 @@ public class UsersRemoteDataSource implements UserDataSource {
 
     @Override
     public void getUsers(@NonNull final FetchUsersCallback callback, String queryParam) {
-//        if (mCall != null) {
-//            mCall.cancel();
-//            mCall = null;
-//        }
-
         mCall = APIClient.getClient().create(ApiInterface.class).getUsers(queryParam);
 
         mCall.enqueue(new Callback<ResUserData>() {
@@ -48,5 +43,13 @@ public class UsersRemoteDataSource implements UserDataSource {
                 callback.onDataNotAvailable();
             }
         });
+    }
+
+    @Override
+    public void cancelRequest() {
+        if (mCall != null) {
+            mCall.cancel();
+            mCall = null;
+        }
     }
 }

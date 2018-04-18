@@ -13,4 +13,6 @@ public interface UserDataSource {
 
     void getUsers(@NonNull FetchUsersCallback callback, String queryParam);
 
+    void cancelRequest();
+
 }

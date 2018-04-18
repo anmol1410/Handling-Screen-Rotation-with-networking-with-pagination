@@ -49,6 +49,11 @@ public class UsersRepository implements UserDataSource {
         }
     }
 
+    @Override
+    public void cancelRequest() {
+        mUsersRemoteDataSource.cancelRequest();
+    }
+
     private void getFeedsFromRemoteDataSource(@NonNull final FetchUsersCallback callback, final String queryParam) {
         mUsersRemoteDataSource.getUsers(new FetchUsersCallback() {
 
