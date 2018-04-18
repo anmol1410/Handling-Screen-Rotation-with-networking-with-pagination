@@ -15,6 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -31,6 +32,7 @@ public class SearchActivity extends AppCompatActivity {
 
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
     private static final int LOADER_ID = 1;
+    private static final String KEY_USER_LIST = "KEY_USER_LIST";
 
     private RecyclerView mRvUsers;
     private TextView mTvMsg;
@@ -48,6 +50,11 @@ public class SearchActivity extends AppCompatActivity {
         initViews();
 
         if (savedInstanceState != null) {
+            mTvMsg.setVisibility(View.GONE);
+            
+            mUserList = savedInstanceState.getParcelableArrayList(KEY_USER_LIST);
+            setAdapter(mUserList);
+
             Parcelable listState = savedInstanceState.getParcelable(KEY_LIST_SCROLL_POS);
             mRvUsers.getLayoutManager().onRestoreInstanceState(listState);
         }
@@ -83,6 +90,7 @@ public class SearchActivity extends AppCompatActivity {
     public void onSaveInstanceState(Bundle savedInstanceState) {
         Parcelable listState = mRvUsers.getLayoutManager().onSaveInstanceState();
         savedInstanceState.putParcelable(KEY_LIST_SCROLL_POS, listState);
+        savedInstanceState.putParcelableArrayList(KEY_USER_LIST, (ArrayList) mUserList);
     }
 
     private class SearchQueryListener implements SearchView.OnQueryTextListener {
@@ -128,8 +136,7 @@ public class SearchActivity extends AppCompatActivity {
             Toast.makeText(SearchActivity.this, "aaga", Toast.LENGTH_LONG).show();
 
             if (mAdapter == null) {
-                mAdapter = new UsersAdapter(SearchActivity.this, newRes);
-                mRvUsers.setAdapter(mAdapter);
+                setAdapter(newRes);
                 mUserList = newRes;
             } else {
                 mUserList.clear();
@@ -169,8 +176,7 @@ public class SearchActivity extends AppCompatActivity {
             List<UserModel> newRes = new ResToUiUserList().convert(userRes.getData());
 
             if (mAdapter == null) {
-                mAdapter = new UsersAdapter(SearchActivity.this, newRes);
-                mRvUsers.setAdapter(mAdapter);
+                setAdapter(newRes);
                 mUserList = newRes;
             } else {
                 mUserList.clear();
@@ -194,5 +200,10 @@ public class SearchActivity extends AppCompatActivity {
             mPbLoading.setVisibility(View.GONE);
             mTvMsg.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void setAdapter(List<UserModel> newRes) {
+        mAdapter = new UsersAdapter(SearchActivity.this, newRes);
+        mRvUsers.setAdapter(mAdapter);
     }
 }
