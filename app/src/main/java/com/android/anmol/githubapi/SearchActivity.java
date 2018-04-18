@@ -3,7 +3,6 @@ package com.android.anmol.githubapi;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
@@ -31,7 +30,6 @@ import retrofit2.Response;
 public class SearchActivity extends AppCompatActivity implements HeadlessFragment.OnFragmentInteractionListener {
 
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
-    private static final int LOADER_ID = 1;
     private static final String KEY_USER_LIST = "KEY_USER_LIST";
     private static final String KEY_UNDER_PROGRESS = "KEY_UNDER_PROGRESS";
 
@@ -39,17 +37,18 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
     private TextView mTvMsg;
     private ProgressBar mPbLoading;
 
-
     private List<UserModel> mUserList = new ArrayList<>();
     private UsersAdapter mAdapter;
     private HeadlessFragment mHeadlessFragment;
+    private String FRAGMENT_TAG = "HeadlessFragment";
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.hasExtra("Response") && intent.getParcelableExtra("Response") != null) {
-                mPbLoading.setVisibility(View.GONE);
 
-                ResUserData userRes = intent.getParcelableExtra("Response");
+            ResUserData userRes = HeadlessFragment.getResponseFromIntent(intent);
+
+            if (userRes != null) {
+                mPbLoading.setVisibility(View.GONE);
 
                 mTvMsg.setVisibility(View.GONE);
 
@@ -88,7 +87,7 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
 
         initViews();
 
-        mHeadlessFragment = (HeadlessFragment) getSupportFragmentManager().findFragmentByTag("HeadlessFragment");
+        mHeadlessFragment = (HeadlessFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
         if (mHeadlessFragment == null) {
             mHeadlessFragment = HeadlessFragment.newInstance();
             getSupportFragmentManager().beginTransaction().add(mHeadlessFragment, "HeadlessFragment").commit();
@@ -221,7 +220,7 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
     @Override
     protected void onResume() {
         super.onResume();
-        LocalBroadcastManager.getInstance(this).registerReceiver(mResultReceiver, new IntentFilter("KEY"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mResultReceiver, HeadlessFragment.getIntentFilterForRegister());
     }
 
     @Override

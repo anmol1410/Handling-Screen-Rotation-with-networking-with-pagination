@@ -2,6 +2,7 @@ package com.android.anmol.githubapi;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,8 @@ import retrofit2.Response;
 
 public class HeadlessFragment extends Fragment {
 
+    private static final String KEY_BROADCAST_INTENT_FILTER = "KEY_BROADCAST_INTENT_FILTER";
+    private static final String KEY_RESPONSE = "KEY_RESPONSE";
     private OnFragmentInteractionListener mListener;
     private Call<ResUserData> mCall;
 
@@ -79,10 +82,18 @@ public class HeadlessFragment extends Fragment {
     }
 
     private void sendData(@Nullable Response<ResUserData> response) {
-        Intent intent = new Intent("KEY");
+        Intent intent = new Intent(KEY_BROADCAST_INTENT_FILTER);
         if (response != null) {
-            intent.putExtra("Response", response.body());
+            intent.putExtra(KEY_RESPONSE, response.body());
         }
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
+    }
+
+    public static ResUserData getResponseFromIntent(Intent intent) {
+        return intent.getParcelableExtra(KEY_RESPONSE);
+    }
+
+    public static IntentFilter getIntentFilterForRegister() {
+        return new IntentFilter(KEY_BROADCAST_INTENT_FILTER);
     }
 }
