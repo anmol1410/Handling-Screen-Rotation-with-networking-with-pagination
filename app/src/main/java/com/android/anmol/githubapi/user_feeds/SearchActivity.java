@@ -17,8 +17,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.android.anmol.githubapi.R;
-import com.android.anmol.githubapi.user_feeds.presenter.UsersPresenter;
 import com.android.anmol.githubapi.base.Injection;
+import com.android.anmol.githubapi.user_feeds.presenter.UsersPresenter;
 import com.android.anmol.githubapi.user_feeds.ui_handling.RecyclerViewSpaceItemDecorator;
 import com.android.anmol.githubapi.utility.logging.MyLog;
 
@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The list should populate as you type in DONE
+ * The list should populate as you type in
  * Use pagination
- * Handle orientation change a. network req -> Done b. Done for UI
+ * Handle orientation change
  * Demonstrate usage of popular libraries
  */
 public class SearchActivity extends AppCompatActivity {
@@ -164,7 +164,7 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         void sendRequest(String param) {
-            MyLog.e(TAG, "Query param : " + param);
+            MyLog.i(TAG, "Query param : " + param);
 
             mPbLoading.setVisibility(View.VISIBLE);
             mTvMsg.setVisibility(View.GONE);

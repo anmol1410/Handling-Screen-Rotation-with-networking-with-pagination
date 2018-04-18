@@ -26,6 +26,7 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
         if (param == null) {
             return;
         }
+
         param = param.trim();
 
         if (param.isEmpty()) {
