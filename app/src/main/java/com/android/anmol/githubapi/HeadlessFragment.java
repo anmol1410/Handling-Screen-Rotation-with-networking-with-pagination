@@ -7,16 +7,19 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 
-import retrofit2.Call;
-import retrofit2.Response;
+import java.util.ArrayList;
+import java.util.List;
 
-public class HeadlessFragment extends Fragment {
+import retrofit2.Call;
+
+public class HeadlessFragment extends Fragment implements UsersContract.View {
 
     private final String TAG = HeadlessFragment.class.getSimpleName();
 
     private static final String KEY_BROADCAST_INTENT_FILTER = "KEY_BROADCAST_INTENT_FILTER";
     private static final String KEY_RESPONSE = "KEY_RESPONSE";
     private Call<ResUserData> mCall;
+    private UsersContract.FeedDetailsPresenter mPresenter;
 
     public HeadlessFragment() {
         // Required empty public constructor
@@ -40,8 +43,9 @@ public class HeadlessFragment extends Fragment {
 
     public void sendRequest(String param) {
         MyLog.d(TAG, "Sending Request");
-        mCall = APIClient.getClient().create(ApiInterface.class).getUsers(param);
-        mCall.enqueue(new ResponseListener());
+        mPresenter.getUsers(param);
+//        mCall = APIClient.getClient().create(ApiInterface.class).getUsers(param);
+//        mCall.enqueue(new ResponseListener());
     }
 
     public void cancelRequest() {
@@ -51,30 +55,31 @@ public class HeadlessFragment extends Fragment {
         }
     }
 
-    private class ResponseListener implements retrofit2.Callback<ResUserData> {
-        @Override
-        public void onResponse(Call<ResUserData> call, Response<ResUserData> response) {
-            MyLog.d(TAG, "Response received : " + response.body());
-            sendData(response);
-        }
-
-        @Override
-        public void onFailure(Call<ResUserData> call, Throwable t) {
-            MyLog.e(TAG, "Response Failure : " + t);
-            sendData(null);
-        }
+    @Override
+    public void setPresenter(UsersContract.FeedDetailsPresenter presenter) {
+        mPresenter = presenter;
     }
 
-    private void sendData(@Nullable Response<ResUserData> response) {
+    @Override
+    public void onUsersFetched(List<UserModel> users) {
+        sendData(users);
+    }
+
+    @Override
+    public void onUsersFetchFailure() {
+        sendData(null);
+    }
+
+    private void sendData(@Nullable List<UserModel> response) {
         Intent intent = new Intent(KEY_BROADCAST_INTENT_FILTER);
         if (response != null) {
-            intent.putExtra(KEY_RESPONSE, response.body());
+            intent.putParcelableArrayListExtra(KEY_RESPONSE, (ArrayList<UserModel>) response);
         }
         LocalBroadcastManager.getInstance(getContext()).sendBroadcast(intent);
     }
 
-    public static ResUserData getResponseFromIntent(Intent intent) {
-        return intent.getParcelableExtra(KEY_RESPONSE);
+    public static List<UserModel> getResponseFromIntent(Intent intent) {
+        return intent.getParcelableArrayListExtra(KEY_RESPONSE);
     }
 
     public static IntentFilter getIntentFilterForRegister() {

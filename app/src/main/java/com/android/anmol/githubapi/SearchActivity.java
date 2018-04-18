@@ -44,23 +44,19 @@ public class SearchActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            ResUserData userRes = HeadlessFragment.getResponseFromIntent(intent);
+            List<UserModel> userRes = HeadlessFragment.getResponseFromIntent(intent);
 
             if (userRes != null) {
                 mPbLoading.setVisibility(View.GONE);
 
                 mTvMsg.setVisibility(View.GONE);
 
-                List<UserModel> newRes = new ResToUiUserList().convert(userRes.getData());
-
                 if (mAdapter == null) {
-                    setAdapter(newRes);
-                    mUserList = newRes;
+                    setAdapter(userRes);
+                    mUserList = userRes;
                 } else {
                     mUserList.clear();
-                    if (newRes != null) {
-                        mUserList.addAll(newRes);
-                    }
+                    mUserList.addAll(userRes);
                 }
                 mAdapter.notifyDataSetChanged();
             } else {
@@ -105,6 +101,10 @@ public class SearchActivity extends AppCompatActivity {
             Parcelable listState = savedInstanceState.getParcelable(KEY_LIST_SCROLL_POS);
             mRvUsers.getLayoutManager().onRestoreInstanceState(listState);
         }
+
+        new UsersPresenter(
+                Injection.provideUsersRepository(),
+                mHeadlessFragment);
     }
 
     private void initViews() {
