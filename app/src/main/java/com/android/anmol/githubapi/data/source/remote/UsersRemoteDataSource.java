@@ -40,6 +40,9 @@ public class UsersRemoteDataSource implements UserDataSource {
 
             @Override
             public void onFailure(Call<ResUserData> call, Throwable t) {
+                if (call.isCanceled()) {
+                    return;
+                }
                 callback.onDataNotAvailable();
             }
         });

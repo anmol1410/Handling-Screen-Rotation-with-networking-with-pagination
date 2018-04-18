@@ -43,7 +43,9 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     // Means the loader is not showing and the count of last element visible is same as the total
                     // number of items given to the recycler View to present, meaning that we can now load more
                     // elements in it.
-                    if (listener != null && firstVisibleItem != 0) {
+                    if (listener != null
+                            && firstVisibleItem != 0
+                            ) {
                         // Trigger the callback to load more items in the recycler view.
                         listener.onScrollRecyclerView();
                     }
