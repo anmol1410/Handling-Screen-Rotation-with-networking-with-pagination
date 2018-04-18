@@ -11,7 +11,7 @@ public class UsersRepository implements UserDataSource {
 
     private final UserDataSource mUsersRemoteDataSource;
 
-    private LruCache<String, ResUserData> mCachedResponse = new LruCache<>(200);
+    private LruCache<CacheModel, ResUserData> mCachedResponse = new LruCache<>(200);
 
     // Prevent direct instantiation.
     private UsersRepository(@NonNull UserDataSource userRemoteDataSource) {
@@ -42,8 +42,9 @@ public class UsersRepository implements UserDataSource {
     public void getUsers(@NonNull FetchUsersCallback callback, String queryParam, int page) {
         Utils.checkNotNull(callback);
 
-        if (mCachedResponse != null && mCachedResponse.get(queryParam) != null) {
-            callback.onUsersFetched(mCachedResponse.get(queryParam));
+        CacheModel cacheModel = new CacheModel(queryParam, page);
+        if (mCachedResponse != null && mCachedResponse.get(cacheModel) != null) {
+            callback.onUsersFetched(mCachedResponse.get(cacheModel));
         } else {
             getFeedsFromRemoteDataSource(callback, queryParam, page);
         }
@@ -61,7 +62,7 @@ public class UsersRepository implements UserDataSource {
 
             @Override
             public void onUsersFetched(ResUserData users) {
-                mCachedResponse.put(queryParam, users);
+                mCachedResponse.put(new CacheModel(queryParam, page), users);
                 callback.onUsersFetched(users);
             }
 
