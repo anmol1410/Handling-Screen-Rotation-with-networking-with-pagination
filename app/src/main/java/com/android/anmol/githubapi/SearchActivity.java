@@ -19,19 +19,18 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Response;
-
 /**
  * The list should populate as you type in DONE
  * Use pagination
  * Handle orientation change a. network req -> Done b. Done for UI
  * Demonstrate usage of popular libraries
  */
-public class SearchActivity extends AppCompatActivity implements HeadlessFragment.OnFragmentInteractionListener {
+public class SearchActivity extends AppCompatActivity {
 
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
     private static final String KEY_USER_LIST = "KEY_USER_LIST";
     private static final String KEY_UNDER_PROGRESS = "KEY_UNDER_PROGRESS";
+    private static final String TAG = SearchActivity.class.getSimpleName();
 
     private RecyclerView mRvUsers;
     private TextView mTvMsg;
@@ -40,7 +39,7 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
     private List<UserModel> mUserList = new ArrayList<>();
     private UsersAdapter mAdapter;
     private HeadlessFragment mHeadlessFragment;
-    private String FRAGMENT_TAG = "HeadlessFragment";
+    private final String FRAGMENT_TAG = "HeadlessFragment";
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -142,51 +141,6 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
         savedInstanceState.putBoolean(KEY_UNDER_PROGRESS, mPbLoading.getVisibility() == View.VISIBLE);
     }
 
-    @Override
-    public void onResponse(Response<ResUserData> response) {
-        mPbLoading.setVisibility(View.GONE);
-
-        if (response == null) {
-            onFailure();
-            return;
-        }
-        ResUserData userRes = response.body();
-
-        if (userRes == null || userRes.getData().isEmpty()) {
-            onFailure();
-            return;
-        }
-
-        mTvMsg.setVisibility(View.GONE);
-
-        List<UserModel> newRes = new ResToUiUserList().convert(userRes.getData());
-
-        if (mAdapter == null) {
-            setAdapter(newRes);
-            mUserList = newRes;
-        } else {
-            mUserList.clear();
-            if (newRes != null) {
-                mUserList.addAll(newRes);
-            }
-        }
-        mAdapter.notifyDataSetChanged();
-    }
-
-    @Override
-    public void onFailure() {
-        mHeadlessFragment.cancelRequest();
-        if (mUserList != null) {
-            mUserList.clear();
-            if (mAdapter != null) {
-                mAdapter.notifyDataSetChanged();
-            }
-        }
-
-        mPbLoading.setVisibility(View.GONE);
-        mTvMsg.setVisibility(View.VISIBLE);
-    }
-
     private class SearchQueryListener implements SearchView.OnQueryTextListener {
 
         @Override
@@ -203,6 +157,8 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
         }
 
         void sendRequest(String param) {
+            MyLog.e(TAG, "Query param : " + param);
+
             if (param == null) {
                 return;
             }
@@ -220,12 +176,14 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
     @Override
     protected void onResume() {
         super.onResume();
+        MyLog.e(TAG, "Broadcast registered");
         LocalBroadcastManager.getInstance(this).registerReceiver(mResultReceiver, HeadlessFragment.getIntentFilterForRegister());
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        MyLog.e(TAG, "Broadcast unregistered");
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mResultReceiver);
     }
 
@@ -237,7 +195,6 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Making sure we clean references on destroy
         if (mHeadlessFragment != null) {
             mHeadlessFragment = null;
         }
