@@ -5,6 +5,6 @@
     <string name="search_msg">Search for the users from the menu!</string>
     <string name="user_image">user image</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="err_fetching_data">Error fetching Users list</string>
 </resources>

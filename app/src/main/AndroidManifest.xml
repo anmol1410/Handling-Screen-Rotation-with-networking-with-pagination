@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SearchActivity">
+        <activity android:name=".user_feeds.SearchActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -26,9 +26,6 @@
                 android:resource="@xml/searchable" />
         </activity>
 
-        <service
-            android:name=".MyIntentService"
-            android:exported="false"></service>
     </application>
 
 </manifest>
