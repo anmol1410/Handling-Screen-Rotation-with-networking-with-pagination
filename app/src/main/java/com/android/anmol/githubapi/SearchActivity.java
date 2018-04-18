@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -18,7 +16,6 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +25,7 @@ import retrofit2.Response;
 /**
  * The list should populate as you type in DONE
  * Use pagination
- * Handle orientation change a. network req -> pending b. Done for UI
+ * Handle orientation change a. network req -> Done b. Done for UI
  * Demonstrate usage of popular libraries
  */
 public class SearchActivity extends AppCompatActivity implements HeadlessFragment.OnFragmentInteractionListener {
@@ -36,6 +33,7 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
     private static final int LOADER_ID = 1;
     private static final String KEY_USER_LIST = "KEY_USER_LIST";
+    private static final String KEY_UNDER_PROGRESS = "KEY_UNDER_PROGRESS";
 
     private RecyclerView mRvUsers;
     private TextView mTvMsg;
@@ -99,6 +97,10 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
         if (savedInstanceState != null) {
             mTvMsg.setVisibility(View.GONE);
 
+            if (savedInstanceState.getBoolean(KEY_UNDER_PROGRESS)) {
+                mPbLoading.setVisibility(View.VISIBLE);
+            }
+
             mUserList = savedInstanceState.getParcelableArrayList(KEY_USER_LIST);
             setAdapter(mUserList);
 
@@ -138,6 +140,7 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
         Parcelable listState = mRvUsers.getLayoutManager().onSaveInstanceState();
         savedInstanceState.putParcelable(KEY_LIST_SCROLL_POS, listState);
         savedInstanceState.putParcelableArrayList(KEY_USER_LIST, (ArrayList) mUserList);
+        savedInstanceState.putBoolean(KEY_UNDER_PROGRESS, mPbLoading.getVisibility() == View.VISIBLE);
     }
 
     @Override
@@ -201,10 +204,6 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
         }
 
         void sendRequest(String param) {
-            Bundle args = new Bundle();
-            args.putString("", "");
-            args.putString("", "");
-            args.putString("", "");
             if (param == null) {
                 return;
             }
@@ -216,9 +215,6 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
 
             mHeadlessFragment.cancelRequest();
             mHeadlessFragment.sendRequest(param);
-
-//            getSupportLoaderManager().initLoader(LOADER_ID, args, new LoaderCallbackListener());
-
         }
     }
 
@@ -234,38 +230,6 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mResultReceiver);
     }
 
-    private class LoaderCallbackListener implements LoaderManager.LoaderCallbacks<ResUserData> {
-        @Override
-        public Loader<ResUserData> onCreateLoader(int id, Bundle args) {
-            return new NetworkCallLoader(SearchActivity.this);
-        }
-
-        @Override
-        public void onLoadFinished(Loader<ResUserData> loader, ResUserData users) {
-
-            List<UserModel> newRes = new ResToUiUserList().convert(users.getData());
-
-            Toast.makeText(SearchActivity.this, "aaga", Toast.LENGTH_LONG).show();
-
-            if (mAdapter == null) {
-                setAdapter(newRes);
-                mUserList = newRes;
-            } else {
-                mUserList.clear();
-                if (newRes != null) {
-                    mUserList.addAll(newRes);
-                }
-            }
-            mAdapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onLoaderReset(Loader<ResUserData> loader) {
-            mUserList.clear();
-            mAdapter.notifyDataSetChanged();
-        }
-    }
-
     private void setAdapter(List<UserModel> newRes) {
         mAdapter = new UsersAdapter(SearchActivity.this, newRes);
         mRvUsers.setAdapter(mAdapter);
@@ -279,6 +243,4 @@ public class SearchActivity extends AppCompatActivity implements HeadlessFragmen
             mHeadlessFragment = null;
         }
     }
-
-
 }
