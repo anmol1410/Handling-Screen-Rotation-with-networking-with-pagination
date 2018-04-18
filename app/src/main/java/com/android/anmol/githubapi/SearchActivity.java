@@ -1,9 +1,14 @@
 package com.android.anmol.githubapi;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,17 +23,15 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * The list should populate as you type in
+ * The list should populate as you type in DONE
  * Use pagination
- * Handle orientation change
+ * Handle orientation change a. network req -> pending b. Done for UI
  * Demonstrate usage of popular libraries
  */
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements HeadlessFragment.OnFragmentInteractionListener {
 
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
     private static final int LOADER_ID = 1;
@@ -39,8 +42,46 @@ public class SearchActivity extends AppCompatActivity {
     private ProgressBar mPbLoading;
 
 
-    private List<UserModel> mUserList;
+    private List<UserModel> mUserList = new ArrayList<>();
     private UsersAdapter mAdapter;
+    private HeadlessFragment mHeadlessFragment;
+    private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.hasExtra("Response") && intent.getParcelableExtra("Response") != null) {
+                mPbLoading.setVisibility(View.GONE);
+
+                ResUserData userRes = intent.getParcelableExtra("Response");
+
+                mTvMsg.setVisibility(View.GONE);
+
+                List<UserModel> newRes = new ResToUiUserList().convert(userRes.getData());
+
+                if (mAdapter == null) {
+                    setAdapter(newRes);
+                    mUserList = newRes;
+                } else {
+                    mUserList.clear();
+                    if (newRes != null) {
+                        mUserList.addAll(newRes);
+                    }
+                }
+                mAdapter.notifyDataSetChanged();
+            } else {
+                mHeadlessFragment.cancelRequest();
+                if (mUserList != null) {
+                    mUserList.clear();
+                    if (mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }
+
+                mPbLoading.setVisibility(View.GONE);
+                mTvMsg.setVisibility(View.VISIBLE);
+            }
+        }
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +90,15 @@ public class SearchActivity extends AppCompatActivity {
 
         initViews();
 
+        mHeadlessFragment = (HeadlessFragment) getSupportFragmentManager().findFragmentByTag("HeadlessFragment");
+        if (mHeadlessFragment == null) {
+            mHeadlessFragment = HeadlessFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().add(mHeadlessFragment, "HeadlessFragment").commit();
+        }
+
         if (savedInstanceState != null) {
             mTvMsg.setVisibility(View.GONE);
-            
+
             mUserList = savedInstanceState.getParcelableArrayList(KEY_USER_LIST);
             setAdapter(mUserList);
 
@@ -93,10 +140,56 @@ public class SearchActivity extends AppCompatActivity {
         savedInstanceState.putParcelableArrayList(KEY_USER_LIST, (ArrayList) mUserList);
     }
 
+    @Override
+    public void onResponse(Response<ResUserData> response) {
+        mPbLoading.setVisibility(View.GONE);
+
+        if (response == null) {
+            onFailure();
+            return;
+        }
+        ResUserData userRes = response.body();
+
+        if (userRes == null || userRes.getData().isEmpty()) {
+            onFailure();
+            return;
+        }
+
+        mTvMsg.setVisibility(View.GONE);
+
+        List<UserModel> newRes = new ResToUiUserList().convert(userRes.getData());
+
+        if (mAdapter == null) {
+            setAdapter(newRes);
+            mUserList = newRes;
+        } else {
+            mUserList.clear();
+            if (newRes != null) {
+                mUserList.addAll(newRes);
+            }
+        }
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onFailure() {
+        mHeadlessFragment.cancelRequest();
+        if (mUserList != null) {
+            mUserList.clear();
+            if (mAdapter != null) {
+                mAdapter.notifyDataSetChanged();
+            }
+        }
+
+        mPbLoading.setVisibility(View.GONE);
+        mTvMsg.setVisibility(View.VISIBLE);
+    }
+
     private class SearchQueryListener implements SearchView.OnQueryTextListener {
 
         @Override
         public boolean onQueryTextSubmit(String query) {
+
             sendRequest(query);
             return false;
         }
@@ -112,14 +205,33 @@ public class SearchActivity extends AppCompatActivity {
             args.putString("", "");
             args.putString("", "");
             args.putString("", "");
-
+            if (param == null) {
+                return;
+            }
+            param = param.trim();
+            if (param.isEmpty()) {
+                return;
+            }
             mPbLoading.setVisibility(View.VISIBLE);
-            Call<ResUserData> call = APIClient.getClient().create(ApiInterface.class).getUsers(param);
-            call.enqueue(new ResponseListener());
+
+            mHeadlessFragment.cancelRequest();
+            mHeadlessFragment.sendRequest(param);
 
 //            getSupportLoaderManager().initLoader(LOADER_ID, args, new LoaderCallbackListener());
 
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        LocalBroadcastManager.getInstance(this).registerReceiver(mResultReceiver, new IntentFilter("KEY"));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mResultReceiver);
     }
 
     private class LoaderCallbackListener implements LoaderManager.LoaderCallbacks<ResUserData> {
@@ -154,56 +266,19 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    private class ResponseListener implements Callback<ResUserData> {
-        @Override
-        public void onResponse(Call<ResUserData> call, Response<ResUserData> response) {
-
-            mPbLoading.setVisibility(View.GONE);
-
-            if (response == null) {
-                onFailure(call, null);
-                return;
-            }
-            ResUserData userRes = response.body();
-
-            if (userRes == null || userRes.getData().isEmpty()) {
-                onFailure(call, null);
-                return;
-            }
-
-            mTvMsg.setVisibility(View.GONE);
-
-            List<UserModel> newRes = new ResToUiUserList().convert(userRes.getData());
-
-            if (mAdapter == null) {
-                setAdapter(newRes);
-                mUserList = newRes;
-            } else {
-                mUserList.clear();
-                if (newRes != null) {
-                    mUserList.addAll(newRes);
-                }
-            }
-            mAdapter.notifyDataSetChanged();
-        }
-
-        @Override
-        public void onFailure(Call<ResUserData> call, Throwable t) {
-            call.cancel();
-            if (mUserList != null) {
-                mUserList.clear();
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-            }
-
-            mPbLoading.setVisibility(View.GONE);
-            mTvMsg.setVisibility(View.VISIBLE);
-        }
-    }
-
     private void setAdapter(List<UserModel> newRes) {
         mAdapter = new UsersAdapter(SearchActivity.this, newRes);
         mRvUsers.setAdapter(mAdapter);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Making sure we clean references on destroy
+        if (mHeadlessFragment != null) {
+            mHeadlessFragment = null;
+        }
+    }
+
+
 }

@@ -11,6 +11,9 @@ import java.util.List;
 class UsersAdapter extends RecyclerView.Adapter<UserViewModel> {
     private Activity mActivity;
     private List<UserModel> mUsers;
+    private boolean mIsLoadingAdded = false;
+    private static final int LOADING = 1;
+    private static final int ITEM = 2;
 
     UsersAdapter(Activity activity, List<UserModel> userList) {
         mActivity = activity;
@@ -31,6 +34,11 @@ class UsersAdapter extends RecyclerView.Adapter<UserViewModel> {
 
     @Override
     public int getItemCount() {
-        return mUsers.size();
+        return mUsers == null ? 0 : mUsers.size();
     }
+
+//    @Override
+//    public int getItemViewType(int position) {
+//        return (position == mUsers.size() - 1 && mIsLoadingAdded) ? LOADING : ITEM;
+//    }
 }
