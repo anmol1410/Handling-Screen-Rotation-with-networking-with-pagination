@@ -34,20 +34,50 @@ import java.util.List;
  */
 public class SearchActivity extends AppCompatActivity {
 
+    // KEYS for screen rotation save-state purposes.
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
     private static final String KEY_USER_LIST = "KEY_USER_LIST";
     private static final String KEY_UNDER_PROGRESS = "KEY_UNDER_PROGRESS";
+
+    // For logging purpose.
     private static final String TAG = SearchActivity.class.getSimpleName();
 
+    /**
+     * Recycler view to show the list of users.
+     */
     private RecyclerView mRvUsers;
+
+    /**
+     * Message to show error etc. to the user.
+     */
     private TextView mTvMsg;
+
+    /**
+     * Progress bar to indicate something is being done.
+     */
     private ProgressBar mPbLoading;
 
+    /**
+     * List of users to show on UI.
+     */
     private List<UserModel> mUserList = new ArrayList<>();
+
+    /**
+     * Adapter to load the items.
+     */
     private UsersAdapter mAdapter;
     private NetworkingFragment mNetworkingFragment;
     private final String FRAGMENT_TAG = "NetworkingFragment";
+
+    /**
+     * Start loading starting from the page count = 0.
+     */
     private int mPageCount = 0;
+
+    private String mParam;
+    /**
+     * Receives the user response.
+     */
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -55,8 +85,9 @@ public class SearchActivity extends AppCompatActivity {
             List<UserModel> userRes = NetworkingFragment.getResponseFromIntent(intent);
 
             if (NetworkingFragment.getPageCountFromIntent(intent) != 0) {
+                // Means loading next page for some query.
+                // So change the UI accordingly.
 
-                // Simulate the loading of new data, by the gap of REFRESH_DELAY_IN_MILLIS.
                 // remove the last entry, which was the progress bar(null entry).
                 mUserList.remove(mUserList.size() - 1);
 
@@ -64,8 +95,7 @@ public class SearchActivity extends AppCompatActivity {
                 mAdapter.notifyItemRemoved(mUserList.size());
 
                 if (userRes != null) {
-
-                    // Add new data of size NEW_DATA_FETCH_SIZE in the employee list.
+                    // Add new data in the users list.
                     mUserList.addAll(userRes);
 
                     // Notify the Adapter that the items has changed.
@@ -74,14 +104,13 @@ public class SearchActivity extends AppCompatActivity {
                 }
                 //Stop the loading bar as the data has been loaded.
                 mAdapter.stopLoading();
-
                 return;
             }
 
-
             if (userRes != null) {
-                mPbLoading.setVisibility(View.GONE);
+                // Means got some response to show.
 
+                mPbLoading.setVisibility(View.GONE);
                 mTvMsg.setVisibility(View.GONE);
 
                 if (mAdapter == null) {
@@ -93,6 +122,7 @@ public class SearchActivity extends AppCompatActivity {
                 }
                 mAdapter.notifyDataSetChanged();
             } else {
+                // No data to show, hence clearing the previously shown data if any.
                 if (mUserList != null) {
                     mUserList.clear();
                     if (mAdapter != null) {
@@ -106,7 +136,7 @@ public class SearchActivity extends AppCompatActivity {
             }
         }
     };
-    private String mParam;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,6 +145,7 @@ public class SearchActivity extends AppCompatActivity {
 
         initViews();
 
+        // Setup Headless fragment which will be aware of activity lifecycle changes.
         mNetworkingFragment = (NetworkingFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
         if (mNetworkingFragment == null) {
             mNetworkingFragment = NetworkingFragment.newInstance();
@@ -122,24 +153,33 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         if (savedInstanceState != null) {
+            // Save last state of recycler view.
+
             mTvMsg.setVisibility(View.GONE);
 
             if (savedInstanceState.getBoolean(KEY_UNDER_PROGRESS)) {
+                // Means network call is still under progress.
                 mPbLoading.setVisibility(View.VISIBLE);
             }
 
+            // Populate user list again.
             mUserList = savedInstanceState.getParcelableArrayList(KEY_USER_LIST);
             setAdapter(mUserList);
 
+            // Scroll to the last state before rotation.
             Parcelable listState = savedInstanceState.getParcelable(KEY_LIST_SCROLL_POS);
             mRvUsers.getLayoutManager().onRestoreInstanceState(listState);
         }
 
+        // Instantiate the presenter.
         new UsersPresenter(
                 Injection.provideUsersRepository(),
                 mNetworkingFragment);
     }
 
+    /**
+     * Instantiate views.
+     */
     private void initViews() {
         mRvUsers = (RecyclerView) findViewById(R.id.rv_users);
         mTvMsg = (TextView) findViewById(R.id.tv_msg);
@@ -168,22 +208,28 @@ public class SearchActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Save populated user data, and scroll position.
         Parcelable listState = mRvUsers.getLayoutManager().onSaveInstanceState();
         savedInstanceState.putParcelable(KEY_LIST_SCROLL_POS, listState);
         savedInstanceState.putParcelableArrayList(KEY_USER_LIST, (ArrayList) mUserList);
         savedInstanceState.putBoolean(KEY_UNDER_PROGRESS, mPbLoading.getVisibility() == View.VISIBLE);
     }
 
+    /**
+     * Handle UI change for before any network call is made.
+     */
     public void onPreLoad() {
         mPbLoading.setVisibility(View.VISIBLE);
         mTvMsg.setVisibility(View.GONE);
     }
 
+    /**
+     * Listens to the search query changes.
+     */
     private class SearchQueryListener implements SearchView.OnQueryTextListener {
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-
             sendRequest(query);
             return false;
         }
@@ -197,10 +243,6 @@ public class SearchActivity extends AppCompatActivity {
         void sendRequest(String param) {
             mParam = param;
             MyLog.i(TAG, "Query param : " + param);
-
-//            mPbLoading.setVisibility(View.VISIBLE);
-//            mTvMsg.setVisibility(View.GONE);
-
             mNetworkingFragment.sendRequest(param, mPageCount = 0);
         }
     }
@@ -228,14 +270,19 @@ public class SearchActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (mNetworkingFragment != null) {
+            // Remove the fragment associated with it.
             mNetworkingFragment = null;
         }
     }
 
+    /**
+     * Handles scrolling of recycler view.
+     * Triggered when the user has scrolled to the bottom of the screen.
+     */
     private class ScrollListener implements OnRvScrollListener {
         @Override
         public void onScrollRecyclerView() {
-            // Means the recycler view was scrolled.
+            // Means the recycler view was scrolled to the bottom.
 
             // Add null at the last, so that progress bar will be shown for null item.
             mUserList.add(null);
