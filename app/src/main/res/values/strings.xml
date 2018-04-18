@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">githubApi</string>
+    <string name="menu_action_search">Search</string>
+    <string name="search">Search</string>
+    <string name="search_msg">Search for the users from the menu!</string>
+    <string name="user_image">user image</string>
+</resources>

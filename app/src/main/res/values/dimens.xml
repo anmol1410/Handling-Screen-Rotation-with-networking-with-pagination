@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="spacing">10dp</dimen>
+    <dimen name="zero">0dp</dimen>
+
+    <dimen name="text_size_very_small">12sp</dimen>
+    <dimen name="text_size_small">15sp</dimen>
+    <dimen name="text_size_medium">20sp</dimen>
+    <dimen name="text_size_large">25sp</dimen>
+
+    <dimen name="rv_divider">@dimen/spacing</dimen>
+
+    <dimen name="image_size">40dp</dimen>
+</resources>
