@@ -2,6 +2,9 @@ package com.android.anmol.githubapi.data.source;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Each item in the response of the users from the network call.
+ */
 public class ResUserModel {
 
     @SerializedName("login")

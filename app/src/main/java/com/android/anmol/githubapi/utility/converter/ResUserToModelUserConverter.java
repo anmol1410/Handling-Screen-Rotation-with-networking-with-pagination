@@ -2,11 +2,14 @@ package com.android.anmol.githubapi.utility.converter;
 
 import android.support.annotation.Nullable;
 
+import com.android.anmol.githubapi.base.ModelConverter;
 import com.android.anmol.githubapi.data.source.ResUserModel;
 import com.android.anmol.githubapi.user_feeds.UserModel;
-import com.android.anmol.githubapi.base.ModelConverter;
 
-public class ResuserToModelUserConverter implements ModelConverter<ResUserModel, UserModel> {
+/**
+ * Converts eac'h response item model to UI data model.
+ */
+public class ResUserToModelUserConverter implements ModelConverter<ResUserModel, UserModel> {
 
     @Nullable
     @Override

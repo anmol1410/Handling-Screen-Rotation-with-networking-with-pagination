@@ -7,6 +7,9 @@ import android.support.annotation.DimenRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.StringRes;
 
+/**
+ * Resource related utility.
+ */
 public class ResUtils {
 
     public static int getDimen(Context context, @DimenRes int dimenRes) {

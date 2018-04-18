@@ -3,7 +3,10 @@ package com.android.anmol.githubapi.user_feeds;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class UserModel implements Parcelable{
+/**
+ * Model data which can be loaded on UI.
+ */
+public class UserModel implements Parcelable {
 
     private String mUser;
     private String mUserImagePath;

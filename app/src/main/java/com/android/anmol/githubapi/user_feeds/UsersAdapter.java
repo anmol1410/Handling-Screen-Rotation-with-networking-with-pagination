@@ -14,10 +14,18 @@ import com.android.anmol.githubapi.user_feeds.viewholder.UserViewModel;
 import java.util.List;
 
 public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    // Type for loading item.
     private static final int VIEW_TYPE_LOADING = 1;
+
+    // Type for data item.
     private static final int VIEW_TYPE_DATA = 2;
+
     private Activity mActivity;
+
+    // List of users.
     private List<UserModel> mUsers;
+
+    // Checks whether the loader is shown or not.
     private boolean mShowLoader;
 
     public UsersAdapter(final RecyclerView recyclerView,
@@ -45,6 +53,8 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     // elements in it.
                     if (listener != null && firstVisibleItem > 0) {
                         // Trigger the callback to load more items in the recycler view.
+                        // Only triggered if there are more elements to fit on screen.
+                        // If all elements are present then no need to load more.
                         listener.onScrollRecyclerView();
                     }
 
@@ -59,7 +69,7 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         RecyclerView.ViewHolder viewHolder = null;
         if (viewType == VIEW_TYPE_DATA) {
-
+            // Load Data item view.
             View inflatedView = LayoutInflater.from(mActivity).inflate(R.layout.item_row_layout, parent, false);
             viewHolder = new UserViewModel(inflatedView);
         } else if (viewType == VIEW_TYPE_LOADING) {

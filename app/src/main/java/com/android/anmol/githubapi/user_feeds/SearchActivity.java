@@ -45,16 +45,16 @@ public class SearchActivity extends AppCompatActivity {
 
     private List<UserModel> mUserList = new ArrayList<>();
     private UsersAdapter mAdapter;
-    private HeadlessFragment mHeadlessFragment;
-    private final String FRAGMENT_TAG = "HeadlessFragment";
+    private NetworkingFragment mNetworkingFragment;
+    private final String FRAGMENT_TAG = "NetworkingFragment";
     private int mPageCount = 0;
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
-            List<UserModel> userRes = HeadlessFragment.getResponseFromIntent(intent);
+            List<UserModel> userRes = NetworkingFragment.getResponseFromIntent(intent);
 
-            if (HeadlessFragment.getPageCountFromIntent(intent) != 0) {
+            if (NetworkingFragment.getPageCountFromIntent(intent) != 0) {
 
                 // Simulate the loading of new data, by the gap of REFRESH_DELAY_IN_MILLIS.
                 // remove the last entry, which was the progress bar(null entry).
@@ -115,10 +115,10 @@ public class SearchActivity extends AppCompatActivity {
 
         initViews();
 
-        mHeadlessFragment = (HeadlessFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
-        if (mHeadlessFragment == null) {
-            mHeadlessFragment = HeadlessFragment.newInstance();
-            getSupportFragmentManager().beginTransaction().add(mHeadlessFragment, FRAGMENT_TAG).commit();
+        mNetworkingFragment = (NetworkingFragment) getSupportFragmentManager().findFragmentByTag(FRAGMENT_TAG);
+        if (mNetworkingFragment == null) {
+            mNetworkingFragment = NetworkingFragment.newInstance();
+            getSupportFragmentManager().beginTransaction().add(mNetworkingFragment, FRAGMENT_TAG).commit();
         }
 
         if (savedInstanceState != null) {
@@ -137,7 +137,7 @@ public class SearchActivity extends AppCompatActivity {
 
         new UsersPresenter(
                 Injection.provideUsersRepository(),
-                mHeadlessFragment);
+                mNetworkingFragment);
     }
 
     private void initViews() {
@@ -201,7 +201,7 @@ public class SearchActivity extends AppCompatActivity {
 //            mPbLoading.setVisibility(View.VISIBLE);
 //            mTvMsg.setVisibility(View.GONE);
 
-            mHeadlessFragment.sendRequest(param, mPageCount = 0);
+            mNetworkingFragment.sendRequest(param, mPageCount = 0);
         }
     }
 
@@ -209,7 +209,7 @@ public class SearchActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         MyLog.i(TAG, "Broadcast registered");
-        LocalBroadcastManager.getInstance(this).registerReceiver(mResultReceiver, HeadlessFragment.getIntentFilterForRegister());
+        LocalBroadcastManager.getInstance(this).registerReceiver(mResultReceiver, NetworkingFragment.getIntentFilterForRegister());
     }
 
     @Override
@@ -227,8 +227,8 @@ public class SearchActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mHeadlessFragment != null) {
-            mHeadlessFragment = null;
+        if (mNetworkingFragment != null) {
+            mNetworkingFragment = null;
         }
     }
 
@@ -243,7 +243,7 @@ public class SearchActivity extends AppCompatActivity {
             // Notify the Adapter of this new item set.
             mAdapter.notifyItemInserted(mUserList.size() - 1);
 
-            mHeadlessFragment.sendRequest(mParam, ++mPageCount);
+            mNetworkingFragment.sendRequest(mParam, ++mPageCount);
         }
     }
 }

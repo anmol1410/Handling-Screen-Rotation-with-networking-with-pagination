@@ -2,18 +2,21 @@ package com.android.anmol.githubapi.utility;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.android.anmol.githubapi.R;
-import com.android.anmol.githubapi.utility.ResUtils;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.Target;
 
+/**
+ * Utility for Image loading into image views .
+ */
 public class ImageLoadUtils {
     /**
      * Load the Image from the ImageUrl and set in onto the supplied ImageView.
@@ -23,7 +26,7 @@ public class ImageLoadUtils {
      * @param imageView   ImageView to set te image on.
      * @param progressBar Progress Bar to show until the image is successfully downloaded.
      */
-    public static void loadImage(String imageUrl,
+    public static void loadImage(@NonNull String imageUrl,
                                  @Nullable final ImageView imageView,
                                  @Nullable final ProgressBar progressBar) {
         if (imageView == null) {
@@ -35,6 +38,8 @@ public class ImageLoadUtils {
         }
 
         final Context context = imageView.getContext();
+
+        // Using glide to load image into the imageView.
         Glide.with(context)
                 .load(imageUrl)
                 .asBitmap()

@@ -7,7 +7,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-public class ResUserData implements Parcelable{
+/**
+ * Response Model as received from the network call.
+ */
+public class ResUserData implements Parcelable {
 
     @SerializedName("items")
     private List<ResUserModel> mData;

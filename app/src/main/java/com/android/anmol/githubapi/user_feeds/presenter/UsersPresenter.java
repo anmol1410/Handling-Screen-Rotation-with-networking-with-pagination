@@ -9,9 +9,20 @@ import com.android.anmol.githubapi.utility.converter.ResToUiUserList;
 
 import java.util.List;
 
+/**
+ * Listens to user actions from the UI ({@link com.android.anmol.githubapi.user_feeds.SearchActivity}),
+ * retrieves the data and updates the UI as required.
+ */
 public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
 
+    /**
+     * Repository to fetch the data from.
+     */
     private final UsersRepository mUsersRepository;
+
+    /**
+     * View to communicate back to the client.
+     */
     private final UsersContract.View mView;
 
     public UsersPresenter(UsersRepository usersRepository, UsersContract.View view) {
@@ -23,6 +34,7 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
 
     @Override
     public void getUsers(String param, int page) {
+        // Process the input.
         if (param == null) {
             return;
         }
@@ -34,14 +46,21 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
         }
 
         if (page == 0) {
+            // Means data loaded for first page for the given query.
             mView.onPreLoad();
         }
+
+        // Cancel the outgoing request if any, before making the new one.
         cancelRequest();
 
+        // Ask repository to provide the data.
         mUsersRepository.getUsers(new UserDataSource.FetchUsersCallback() {
             @Override
             public void onUsersFetched(ResUserData users) {
+                // Process network response into the response UI can understand.
                 List<UserModel> newRes = new ResToUiUserList().convert(users.getData());
+
+                // Send back the result.
                 mView.onUsersFetched(newRes);
             }
 

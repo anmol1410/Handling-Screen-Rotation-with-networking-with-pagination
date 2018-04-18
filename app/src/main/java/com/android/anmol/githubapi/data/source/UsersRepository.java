@@ -5,6 +5,9 @@ import android.util.LruCache;
 
 import com.android.anmol.githubapi.utility.Utils;
 
+/**
+ * Implementation to load Feeds from Data source.
+ */
 public class UsersRepository implements UserDataSource {
 
     private static UsersRepository INSTANCE = null;
@@ -21,18 +24,18 @@ public class UsersRepository implements UserDataSource {
     /**
      * Returns the single instance of this class, creating it if necessary.
      *
-     * @param feedsRemoteDataSource the backend data source
+     * @param userRemoteDataSource the backend data source
      * @return the {@link UsersRepository} instance
      */
-    public static UsersRepository getInstance(UserDataSource feedsRemoteDataSource) {
+    public static UsersRepository getInstance(UserDataSource userRemoteDataSource) {
         if (INSTANCE == null) {
-            INSTANCE = new UsersRepository(feedsRemoteDataSource);
+            INSTANCE = new UsersRepository(userRemoteDataSource);
         }
         return INSTANCE;
     }
 
     /**
-     * Gets Feeds from cache, local data source or remote data source, whichever is
+     * Gets User data from cache, local data source or remote data source, whichever is
      * available first.
      * <p>
      * Note: {@link FetchUsersCallback#onDataNotAvailable()} is fired if all data sources fail to
@@ -44,8 +47,10 @@ public class UsersRepository implements UserDataSource {
 
         CacheModel cacheModel = new CacheModel(queryParam, page);
         if (mCachedResponse != null && mCachedResponse.get(cacheModel) != null) {
+            // Present in cache, send result back now.
             callback.onUsersFetched(mCachedResponse.get(cacheModel));
         } else {
+            // Not present in cache, hence hit the network call.
             getFeedsFromRemoteDataSource(callback, queryParam, page);
         }
     }
@@ -55,6 +60,13 @@ public class UsersRepository implements UserDataSource {
         mUsersRemoteDataSource.cancelRequest();
     }
 
+    /**
+     * Get User from the Network i.e. remote data source.
+     *
+     * @param callback   {@Link FetchUsersCallback} to send the result back to its implementation.
+     * @param queryParam Query to search the users from.
+     * @param page       Page count so that load the result corresponding to this page.
+     */
     private void getFeedsFromRemoteDataSource(@NonNull final FetchUsersCallback callback,
                                               final String queryParam,
                                               final int page) {
@@ -62,6 +74,7 @@ public class UsersRepository implements UserDataSource {
 
             @Override
             public void onUsersFetched(ResUserData users) {
+                // Save result in cache and send back.
                 mCachedResponse.put(new CacheModel(queryParam, page), users);
                 callback.onUsersFetched(users);
             }

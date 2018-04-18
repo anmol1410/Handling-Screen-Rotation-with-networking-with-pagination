@@ -3,8 +3,6 @@ package com.android.anmol.githubapi.utility;
 import android.support.annotation.Nullable;
 
 /**
- * Created by anmolsehgal on 27-03-2018.
- * <p>
  * Utility methods to handle error scenarios.
  */
 public class Utils {
