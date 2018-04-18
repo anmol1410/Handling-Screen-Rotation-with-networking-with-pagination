@@ -22,7 +22,7 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
     }
 
     @Override
-    public void getUsers(String param) {
+    public void getUsers(String param, int page) {
         if (param == null) {
             return;
         }
@@ -33,6 +33,7 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
             return;
         }
 
+//        mView.onPreLoad();
         cancelRequest();
 
         mUsersRepository.getUsers(new UserDataSource.FetchUsersCallback() {
@@ -46,7 +47,7 @@ public class UsersPresenter implements UsersContract.FeedDetailsPresenter {
             public void onDataNotAvailable() {
                 mView.onUsersFetchFailure();
             }
-        }, param);
+        }, param, page);
     }
 
     @Override

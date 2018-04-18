@@ -29,8 +29,8 @@ public class UsersRemoteDataSource implements UserDataSource {
     }
 
     @Override
-    public void getUsers(@NonNull final FetchUsersCallback callback, String queryParam) {
-        mCall = APIClient.getClient().create(ApiInterface.class).getUsers(queryParam);
+    public void getUsers(@NonNull final FetchUsersCallback callback, String queryParam, int page) {
+        mCall = APIClient.getClient().create(ApiInterface.class).getUsers(queryParam, page);
 
         mCall.enqueue(new Callback<ResUserData>() {
             @Override

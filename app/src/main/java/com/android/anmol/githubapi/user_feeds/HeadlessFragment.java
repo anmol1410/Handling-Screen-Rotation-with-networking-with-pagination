@@ -18,12 +18,14 @@ import retrofit2.Call;
 
 public class HeadlessFragment extends Fragment implements UsersContract.View {
 
+    private static final String KEY_PAGE_COUNT = "KEY_PAGE_COUNT";
     private final String TAG = HeadlessFragment.class.getSimpleName();
 
     private static final String KEY_BROADCAST_INTENT_FILTER = "KEY_BROADCAST_INTENT_FILTER";
     private static final String KEY_RESPONSE = "KEY_RESPONSE";
     private Call<ResUserData> mCall;
     private UsersContract.FeedDetailsPresenter mPresenter;
+    private int mPageCount;
 
     public HeadlessFragment() {
         // Required empty public constructor
@@ -39,24 +41,11 @@ public class HeadlessFragment extends Fragment implements UsersContract.View {
         setRetainInstance(true);
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        cancelRequest();
-    }
+    public void sendRequest(String param, int page) {
+        mPageCount = page;
 
-    public void sendRequest(String param) {
         MyLog.d(TAG, "Sending Request");
-        mPresenter.getUsers(param);
-//        mCall = APIClient.getClient().create(ApiInterface.class).getUsers(param);
-//        mCall.enqueue(new ResponseListener());
-    }
-
-    public void cancelRequest() {
-        MyLog.d(TAG, "Cancelling Request");
-        if (mCall != null) {
-//            mCall.cancel();
-        }
+        mPresenter.getUsers(param, page);
     }
 
     @Override
@@ -74,8 +63,14 @@ public class HeadlessFragment extends Fragment implements UsersContract.View {
         sendData(null);
     }
 
+    @Override
+    public void onPreLoad() {
+        ((SearchActivity)getContext()).onPreLoad();
+    }
+
     private void sendData(@Nullable List<UserModel> response) {
         Intent intent = new Intent(KEY_BROADCAST_INTENT_FILTER);
+        intent.putExtra(KEY_PAGE_COUNT, mPageCount);
         if (response != null) {
             intent.putParcelableArrayListExtra(KEY_RESPONSE, (ArrayList<UserModel>) response);
         }
@@ -84,6 +79,10 @@ public class HeadlessFragment extends Fragment implements UsersContract.View {
 
     public static List<UserModel> getResponseFromIntent(Intent intent) {
         return intent.getParcelableArrayListExtra(KEY_RESPONSE);
+    }
+
+    public static int getPageCountFromIntent(Intent intent) {
+        return intent.getIntExtra(KEY_PAGE_COUNT, 0);
     }
 
     public static IntentFilter getIntentFilterForRegister() {

@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.android.anmol.githubapi.R;
 import com.android.anmol.githubapi.base.Injection;
 import com.android.anmol.githubapi.user_feeds.presenter.UsersPresenter;
+import com.android.anmol.githubapi.user_feeds.ui_handling.OnRvScrollListener;
 import com.android.anmol.githubapi.user_feeds.ui_handling.RecyclerViewSpaceItemDecorator;
 import com.android.anmol.githubapi.utility.logging.MyLog;
 
@@ -46,11 +47,34 @@ public class SearchActivity extends AppCompatActivity {
     private UsersAdapter mAdapter;
     private HeadlessFragment mHeadlessFragment;
     private final String FRAGMENT_TAG = "HeadlessFragment";
+    private int mPageCount = 0;
     private BroadcastReceiver mResultReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
 
             List<UserModel> userRes = HeadlessFragment.getResponseFromIntent(intent);
+
+            if (HeadlessFragment.getPageCountFromIntent(intent) != 0) {
+
+                // Simulate the loading of new data, by the gap of REFRESH_DELAY_IN_MILLIS.
+                // remove the last entry, which was the progress bar(null entry).
+                mUserList.remove(mUserList.size() - 1);
+
+                // Notify the adapter of this changed item.
+                mAdapter.notifyItemRemoved(mUserList.size());
+
+                // Add new data of size NEW_DATA_FETCH_SIZE in the employee list.
+                mUserList.addAll(userRes);
+
+                // Notify the Adapter that the items has changed.
+                mAdapter.notifyDataSetChanged();
+
+                //Stop the loading bar as the data has been loaded.
+                mAdapter.stopLoading();
+
+                return;
+            }
+
 
             if (userRes != null) {
                 mPbLoading.setVisibility(View.GONE);
@@ -66,7 +90,6 @@ public class SearchActivity extends AppCompatActivity {
                 }
                 mAdapter.notifyDataSetChanged();
             } else {
-                mHeadlessFragment.cancelRequest();
                 if (mUserList != null) {
                     mUserList.clear();
                     if (mAdapter != null) {
@@ -79,8 +102,8 @@ public class SearchActivity extends AppCompatActivity {
                 mTvMsg.setText(R.string.err_fetching_data);
             }
         }
-
     };
+    private String mParam;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,6 +171,11 @@ public class SearchActivity extends AppCompatActivity {
         savedInstanceState.putBoolean(KEY_UNDER_PROGRESS, mPbLoading.getVisibility() == View.VISIBLE);
     }
 
+    public void onPreLoad() {
+        mPbLoading.setVisibility(View.VISIBLE);
+        mTvMsg.setVisibility(View.GONE);
+    }
+
     private class SearchQueryListener implements SearchView.OnQueryTextListener {
 
         @Override
@@ -164,13 +192,13 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         void sendRequest(String param) {
+            mParam = param;
             MyLog.i(TAG, "Query param : " + param);
 
             mPbLoading.setVisibility(View.VISIBLE);
             mTvMsg.setVisibility(View.GONE);
 
-            mHeadlessFragment.cancelRequest();
-            mHeadlessFragment.sendRequest(param);
+            mHeadlessFragment.sendRequest(param, mPageCount = 0);
         }
     }
 
@@ -189,7 +217,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void setAdapter(List<UserModel> newRes) {
-        mAdapter = new UsersAdapter(SearchActivity.this, newRes);
+        mAdapter = new UsersAdapter(mRvUsers, SearchActivity.this, newRes, new ScrollListener());
         mRvUsers.setAdapter(mAdapter);
     }
 
@@ -198,6 +226,21 @@ public class SearchActivity extends AppCompatActivity {
         super.onDestroy();
         if (mHeadlessFragment != null) {
             mHeadlessFragment = null;
+        }
+    }
+
+    private class ScrollListener implements OnRvScrollListener {
+        @Override
+        public void onScrollRecyclerView() {
+            // Means the recycler view was scrolled.
+
+            // Add null at the last, so that progress bar will be shown for null item.
+            mUserList.add(null);
+
+            // Notify the Adapter of this new item set.
+            mAdapter.notifyItemInserted(mUserList.size() - 1);
+
+            mHeadlessFragment.sendRequest(mParam, ++mPageCount);
         }
     }
 }

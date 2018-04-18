@@ -11,7 +11,7 @@ public interface UserDataSource {
         void onDataNotAvailable();
     }
 
-    void getUsers(@NonNull FetchUsersCallback callback, String queryParam);
+    void getUsers(@NonNull FetchUsersCallback callback, String queryParam, int page);
 
     void cancelRequest();
 

@@ -33,11 +33,13 @@ public interface UsersContract {
         void onUsersFetched(List<UserModel> users);
 
         void onUsersFetchFailure();
+
+        void onPreLoad();
     }
 
     interface FeedDetailsPresenter {
 
-        void getUsers(String param);
+        void getUsers(String param, int page);
 
         void cancelRequest();
     }
