@@ -63,12 +63,15 @@ public class SearchActivity extends AppCompatActivity {
                 // Notify the adapter of this changed item.
                 mAdapter.notifyItemRemoved(mUserList.size());
 
-                // Add new data of size NEW_DATA_FETCH_SIZE in the employee list.
-                mUserList.addAll(userRes);
+                if (userRes != null) {
 
-                // Notify the Adapter that the items has changed.
-                mAdapter.notifyDataSetChanged();
+                    // Add new data of size NEW_DATA_FETCH_SIZE in the employee list.
+                    mUserList.addAll(userRes);
 
+                    // Notify the Adapter that the items has changed.
+                    mAdapter.notifyDataSetChanged();
+
+                }
                 //Stop the loading bar as the data has been loaded.
                 mAdapter.stopLoading();
 

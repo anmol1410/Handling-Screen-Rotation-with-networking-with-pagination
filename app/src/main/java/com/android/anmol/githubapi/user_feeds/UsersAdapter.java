@@ -43,7 +43,7 @@ public class UsersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                     // number of items given to the recycler View to present, meaning that we can now load more
                     // elements in it.
                     if (listener != null) {
-                        // Trigger the callback to laod more items in the recycler view.
+                        // Trigger the callback to load more items in the recycler view.
                         listener.onScrollRecyclerView();
                     }
 
