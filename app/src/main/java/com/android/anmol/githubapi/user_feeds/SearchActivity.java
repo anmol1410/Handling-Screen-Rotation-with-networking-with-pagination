@@ -38,6 +38,8 @@ public class SearchActivity extends AppCompatActivity {
     private static final String KEY_LIST_SCROLL_POS = "KEY_LIST_SCROLL_POS";
     private static final String KEY_USER_LIST = "KEY_USER_LIST";
     private static final String KEY_UNDER_PROGRESS = "KEY_UNDER_PROGRESS";
+    private static final String KEY_QUERY_PARAM = "KEY_QUERY_PARAM";
+    private static final String KEY_QUERY_PAGE_COUNT = "KEY_QUERY_PAGE_COUNT";
 
     // For logging purpose.
     private static final String TAG = SearchActivity.class.getSimpleName();
@@ -169,6 +171,10 @@ public class SearchActivity extends AppCompatActivity {
             // Scroll to the last state before rotation.
             Parcelable listState = savedInstanceState.getParcelable(KEY_LIST_SCROLL_POS);
             mRvUsers.getLayoutManager().onRestoreInstanceState(listState);
+
+            // Save last  params for further requests.
+            mParam = savedInstanceState.getString(KEY_QUERY_PARAM);
+            mPageCount = savedInstanceState.getInt(KEY_QUERY_PAGE_COUNT, 0);
         }
 
         // Instantiate the presenter.
@@ -213,6 +219,8 @@ public class SearchActivity extends AppCompatActivity {
         savedInstanceState.putParcelable(KEY_LIST_SCROLL_POS, listState);
         savedInstanceState.putParcelableArrayList(KEY_USER_LIST, (ArrayList) mUserList);
         savedInstanceState.putBoolean(KEY_UNDER_PROGRESS, mPbLoading.getVisibility() == View.VISIBLE);
+        savedInstanceState.putString(KEY_QUERY_PARAM, mParam);
+        savedInstanceState.putInt(KEY_QUERY_PAGE_COUNT, mPageCount);
     }
 
     /**
