@@ -26,12 +26,6 @@ import com.android.anmol.githubapi.utility.logging.MyLog;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * The list should populate as you type in
- * Use pagination
- * Handle orientation change
- * Demonstrate usage of popular libraries
- */
 public class SearchActivity extends AppCompatActivity {
 
     // KEYS for screen rotation save-state purposes.
