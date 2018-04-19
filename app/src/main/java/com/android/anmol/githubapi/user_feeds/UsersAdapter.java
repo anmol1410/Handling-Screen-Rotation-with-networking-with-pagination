@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.android.anmol.githubapi.R;
 import com.android.anmol.githubapi.user_feeds.ui_handling.OnRvScrollListener;
+import com.android.anmol.githubapi.user_feeds.viewholder.LoadingViewHolder;
 import com.android.anmol.githubapi.user_feeds.viewholder.UserViewModel;
 
 import java.util.List;

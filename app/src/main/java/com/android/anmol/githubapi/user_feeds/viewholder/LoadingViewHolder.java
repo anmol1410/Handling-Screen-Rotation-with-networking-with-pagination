@@ -1,4 +1,4 @@
-package com.android.anmol.githubapi.user_feeds;
+package com.android.anmol.githubapi.user_feeds.viewholder;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -6,7 +6,7 @@ import android.widget.ProgressBar;
 
 import com.android.anmol.githubapi.R;
 
-class LoadingViewHolder extends RecyclerView.ViewHolder {
+public class LoadingViewHolder extends RecyclerView.ViewHolder {
 
     /**
      * Progress Bar view item.

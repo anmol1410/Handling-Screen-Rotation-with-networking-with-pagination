@@ -1,17 +1,17 @@
 package com.android.anmol.githubapi.user_feeds;
 
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
+        import android.content.Intent;
+        import android.content.IntentFilter;
+        import android.os.Bundle;
+        import android.support.annotation.Nullable;
+        import android.support.v4.app.Fragment;
+        import android.support.v4.content.LocalBroadcastManager;
 
-import com.android.anmol.githubapi.user_feeds.presenter.UsersContract;
-import com.android.anmol.githubapi.utility.logging.MyLog;
+        import com.android.anmol.githubapi.user_feeds.presenter.UsersContract;
+        import com.android.anmol.githubapi.utility.logging.MyLog;
 
-import java.util.ArrayList;
-import java.util.List;
+        import java.util.ArrayList;
+        import java.util.List;
 
 /**
  * Headless fragment to make network calls, so to be aware with activity rotations.
